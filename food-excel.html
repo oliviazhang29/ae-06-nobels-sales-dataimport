@@ -9,9 +9,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="YOU" />
+<meta name="author" content="Olivia Zhang" />
 
-<meta name="date" content="2025-01-15" />
+<meta name="date" content="2025-02-12" />
 
 <title>Favorite foods</title>
 
@@ -1480,14 +1480,25 @@ border-radius: 0px;
 
 
 <h1 class="title toc-ignore">Favorite foods</h1>
-<h4 class="author">YOU</h4>
-<h4 class="date">2025-01-15</h4>
+<h4 class="author">Olivia Zhang</h4>
+<h4 class="date">2025-02-12</h4>
 
 </div>
 
 
-<pre class="r"><code>library(tidyverse)
-library(readxl)</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.2     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(readxl)
+library(stats)</code></pre>
 <div id="part-1-excel-to-csv-workflow" class="section level1">
 <h1>Part 1: Excel to CSV Workflow</h1>
 <div id="step-1-read-the-data" class="section level2">
@@ -1496,8 +1507,16 @@ library(readxl)</code></pre>
 <li>Read in the Excel file called <code>favourite-food.xlsx</code> from
 the <code>data-raw/</code> folder.</li>
 </ul>
-<pre class="r"><code>fav_food &lt;- read_excel(___)
+<pre class="r"><code>fav_food &lt;- read_excel(&quot;data-raw/favourite-food.xlsx&quot;)
 fav_food</code></pre>
+<pre><code>## # A tibble: 5 × 6
+##   `Student ID` `Full Name`      favourite.food     mealPlan          AGE   SES  
+##          &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;             &lt;chr&gt; &lt;chr&gt;
+## 1            1 Sunil Huffmann   Strawberry yoghurt Lunch only        4     High 
+## 2            2 Barclay Lynn     French fries       Lunch only        5     Midd…
+## 3            3 Jayendra Lyne    N/A                Breakfast and lu… 7     Low  
+## 4            4 Leon Rossini     Anchovies          Lunch only        99999 Midd…
+## 5            5 Chidiegwu Dunkel Pizza              Breakfast and lu… five  High</code></pre>
 </div>
 <div id="step-2-clean-the-data" class="section level2">
 <h2>Step 2: Clean the Data</h2>
@@ -1506,14 +1525,41 @@ fav_food</code></pre>
 happy with variable types. Modify the <code>read_excel</code> function
 to take care of these issues.</li>
 </ul>
-<pre class="r"><code>fav_food &lt;- read_excel(___, ___)
-fav_food </code></pre>
+<pre class="r"><code>fav_food &lt;- read_excel(&quot;data-raw/favourite-food.xlsx&quot;, 
+                       na = c(&quot;N/A&quot;, &quot;99999&quot;))
+fav_food &lt;- fav_food %&gt;%
+  mutate(
+    AGE = case_when(
+      AGE == &quot;five&quot; ~ &quot;5&quot;, 
+      TRUE           ~ AGE
+    ), 
+    AGE = as.numeric(AGE)
+  )
+
+fav_food</code></pre>
+<pre><code>## # A tibble: 5 × 6
+##   `Student ID` `Full Name`      favourite.food     mealPlan            AGE SES  
+##          &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;
+## 1            1 Sunil Huffmann   Strawberry yoghurt Lunch only            4 High 
+## 2            2 Barclay Lynn     French fries       Lunch only            5 Midd…
+## 3            3 Jayendra Lyne    &lt;NA&gt;               Breakfast and lu…     7 Low  
+## 4            4 Leon Rossini     Anchovies          Lunch only           NA Midd…
+## 5            5 Chidiegwu Dunkel Pizza              Breakfast and lu…     5 High</code></pre>
 <ul>
 <li>Convert the SES (socioeconomic status) to a factor variables with
 levels in the following order: <code>Low</code>, <code>Middle</code>,
 <code>High</code>.</li>
 </ul>
-<pre class="r"><code># add code here</code></pre>
+<pre class="r"><code>fav_food %&gt;%
+  mutate(SES = fct_relevel(SES, &quot;Low&quot;, &quot;Middle&quot;, &quot;High&quot;))</code></pre>
+<pre><code>## # A tibble: 5 × 6
+##   `Student ID` `Full Name`      favourite.food     mealPlan            AGE SES  
+##          &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;             &lt;dbl&gt; &lt;fct&gt;
+## 1            1 Sunil Huffmann   Strawberry yoghurt Lunch only            4 High 
+## 2            2 Barclay Lynn     French fries       Lunch only            5 Midd…
+## 3            3 Jayendra Lyne    &lt;NA&gt;               Breakfast and lu…     7 Low  
+## 4            4 Leon Rossini     Anchovies          Lunch only           NA Midd…
+## 5            5 Chidiegwu Dunkel Pizza              Breakfast and lu…     5 High</code></pre>
 </div>
 <div id="step-3-save-to-csv" class="section level2">
 <h2>Step 3: Save to CSV</h2>
@@ -1521,7 +1567,12 @@ levels in the following order: <code>Low</code>, <code>Middle</code>,
 <li>Write out the resulting data frame to
 <code>favourite-food.csv</code> in the <code>data/</code> folder.</li>
 </ul>
-<pre class="r"><code># add code here</code></pre>
+<pre class="r"><code>write_csv(fav_food, file = &quot;data-raw/favourite-food.csv&quot;)
+
+fs::dir_ls(&quot;data-raw&quot;)</code></pre>
+<pre><code>## data-raw/favourite-food.csv  data-raw/favourite-food.xlsx 
+## data-raw/nobel.csv           data-raw/nobel_nonstem.csv   
+## data-raw/nobel_stem.csv      data-raw/sales.xlsx</code></pre>
 </div>
 <div id="step-5-verify-csv-data" class="section level2">
 <h2>Step 5: Verify CSV Data</h2>
@@ -1530,7 +1581,16 @@ levels in the following order: <code>Low</code>, <code>Middle</code>,
 <code>data/</code> folder and observe the variable types. Are they as
 you left them?</li>
 </ul>
-<pre class="r"><code># add code here</code></pre>
+<pre class="r"><code>favourite_food &lt;- read.csv(&quot;data-raw/favourite-food.csv&quot;)
+favourite_food</code></pre>
+<pre><code>##   Student.ID        Full.Name     favourite.food            mealPlan AGE    SES
+## 1          1   Sunil Huffmann Strawberry yoghurt          Lunch only   4   High
+## 2          2     Barclay Lynn       French fries          Lunch only   5 Middle
+## 3          3    Jayendra Lyne               &lt;NA&gt; Breakfast and lunch   7    Low
+## 4          4     Leon Rossini          Anchovies          Lunch only  NA Middle
+## 5          5 Chidiegwu Dunkel              Pizza Breakfast and lunch   5   High</code></pre>
+<pre class="r"><code>class(favourite_food$SES)</code></pre>
+<pre><code>## [1] &quot;character&quot;</code></pre>
 </div>
 </div>
 <div id="part-2-excel-to-rds-workflow" class="section level1">
@@ -1542,8 +1602,26 @@ you left them?</li>
 <code>favourite-food.xlsx</code> from the <code>data-raw/</code> folder,
 and handle missing data and variable types.</li>
 </ul>
-<pre class="r"><code>fav_food &lt;- read_excel(___, ___)
-fav_food </code></pre>
+<pre class="r"><code>fav_food &lt;- read_excel(&quot;data-raw/favourite-food.xlsx&quot;, 
+                       na = c(&quot;N/A&quot;, &quot;99999&quot;))
+fav_food &lt;- fav_food %&gt;%
+  mutate(
+    AGE = case_when(
+      AGE == &quot;five&quot; ~ &quot;5&quot;, 
+      TRUE           ~ AGE
+    ), 
+    AGE = as.numeric(AGE)
+  )
+
+fav_food</code></pre>
+<pre><code>## # A tibble: 5 × 6
+##   `Student ID` `Full Name`      favourite.food     mealPlan            AGE SES  
+##          &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;
+## 1            1 Sunil Huffmann   Strawberry yoghurt Lunch only            4 High 
+## 2            2 Barclay Lynn     French fries       Lunch only            5 Midd…
+## 3            3 Jayendra Lyne    &lt;NA&gt;               Breakfast and lu…     7 Low  
+## 4            4 Leon Rossini     Anchovies          Lunch only           NA Midd…
+## 5            5 Chidiegwu Dunkel Pizza              Breakfast and lu…     5 High</code></pre>
 </div>
 <div id="step-2-adjust-variable-types" class="section level2">
 <h2>Step 2: Adjust Variable Types</h2>
@@ -1552,7 +1630,16 @@ fav_food </code></pre>
 in the following order: <code>Low</code>, <code>Middle</code>,
 <code>High</code>.</li>
 </ul>
-<pre class="r"><code># add code here</code></pre>
+<pre class="r"><code>fav_food %&gt;%
+  mutate(SES = fct_relevel(SES, &quot;Low&quot;, &quot;Middle&quot;, &quot;High&quot;))</code></pre>
+<pre><code>## # A tibble: 5 × 6
+##   `Student ID` `Full Name`      favourite.food     mealPlan            AGE SES  
+##          &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;             &lt;dbl&gt; &lt;fct&gt;
+## 1            1 Sunil Huffmann   Strawberry yoghurt Lunch only            4 High 
+## 2            2 Barclay Lynn     French fries       Lunch only            5 Midd…
+## 3            3 Jayendra Lyne    &lt;NA&gt;               Breakfast and lu…     7 Low  
+## 4            4 Leon Rossini     Anchovies          Lunch only           NA Midd…
+## 5            5 Chidiegwu Dunkel Pizza              Breakfast and lu…     5 High</code></pre>
 </div>
 <div id="step-3-save-to-rds" class="section level2">
 <h2>Step 3: Save to RDS</h2>
@@ -1560,13 +1647,30 @@ in the following order: <code>Low</code>, <code>Middle</code>,
 <li>Write out the resulting data frame to
 <code>favourite-food.rds</code> in the <code>data/</code> folder.</li>
 </ul>
-<pre class="r"><code># add code here</code></pre>
+<pre class="r"><code>write_rds(fav_food, file = &quot;data-raw/favourite-food.rds&quot;)
+
+fs::dir_ls(&quot;data-raw&quot;)</code></pre>
+<pre><code>## data-raw/favourite-food.csv  data-raw/favourite-food.rds  
+## data-raw/favourite-food.xlsx data-raw/nobel.csv           
+## data-raw/nobel_nonstem.csv   data-raw/nobel_stem.csv      
+## data-raw/sales.xlsx</code></pre>
 <ul>
 <li>Read <code>favourite-food.rds</code> back in from the
 <code>data/</code> folder and observe the variable types. Are they as
 you left them?</li>
 </ul>
-<pre class="r"><code># add code here</code></pre>
+<pre class="r"><code>favourite_food &lt;- read_rds(&quot;data-raw/favourite-food.rds&quot;)
+favourite_food</code></pre>
+<pre><code>## # A tibble: 5 × 6
+##   `Student ID` `Full Name`      favourite.food     mealPlan            AGE SES  
+##          &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;
+## 1            1 Sunil Huffmann   Strawberry yoghurt Lunch only            4 High 
+## 2            2 Barclay Lynn     French fries       Lunch only            5 Midd…
+## 3            3 Jayendra Lyne    &lt;NA&gt;               Breakfast and lu…     7 Low  
+## 4            4 Leon Rossini     Anchovies          Lunch only           NA Midd…
+## 5            5 Chidiegwu Dunkel Pizza              Breakfast and lu…     5 High</code></pre>
+<pre class="r"><code>class(favourite_food$SES)</code></pre>
+<pre><code>## [1] &quot;character&quot;</code></pre>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>

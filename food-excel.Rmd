@@ -1,6 +1,6 @@
 ---
 title: "Favorite foods"
-author: "YOU"
+author: "Olivia Zhang"
 date: "`r Sys.Date()`"
 output: 
   html_document: 
@@ -8,9 +8,10 @@ output:
     toc_float: yes
 ---
 
-```{r load-packages, message=FALSE}
+```{r load-packages}
 library(tidyverse)
 library(readxl)
+library(stats)
 ```
 
 # Part 1: Excel to CSV Workflow
@@ -20,8 +21,8 @@ library(readxl)
 
 * Read in the Excel file called `favourite-food.xlsx` from the `data-raw/` folder.
 
-```{r label-me1, eval=FALSE}
-fav_food <- read_excel(___)
+```{r read-in-data}
+fav_food <- read_excel("data-raw/favourite-food.xlsx")
 fav_food
 ```
 
@@ -29,24 +30,37 @@ fav_food
 
 * Clean up the missing data (`NA`s) and make sure you're happy with variable types. Modify the `read_excel` function to take care of these issues.
 
-```{r label-me2, eval=FALSE}
-fav_food <- read_excel(___, ___)
-fav_food 
+```{r clean-na}
+fav_food <- read_excel("data-raw/favourite-food.xlsx", 
+                       na = c("N/A", "99999"))
+fav_food <- fav_food %>%
+  mutate(
+    AGE = case_when(
+      AGE == "five" ~ "5", 
+      TRUE           ~ AGE
+    ), 
+    AGE = as.numeric(AGE)
+  )
+
+fav_food
 ```
 
 * Convert the SES (socioeconomic status) to a factor variables with levels in the 
 following order: `Low`, `Middle`, `High`.
 
-```{r label-me3}
-# add code here
+```{r factor-ses}
+fav_food %>%
+  mutate(SES = fct_relevel(SES, "Low", "Middle", "High"))
 ```
 
 ## Step 3: Save to CSV
 
 * Write out the resulting data frame to `favourite-food.csv` in the `data/` folder.
 
-```{r label-me4}
-# add code here
+```{r write-favourite-food}
+write_csv(fav_food, file = "data-raw/favourite-food.csv")
+
+fs::dir_ls("data-raw")
 ```
 
 ## Step 5: Verify CSV Data
@@ -54,8 +68,10 @@ following order: `Low`, `Middle`, `High`.
 * Finally, read `favourite-food.csv` back in from the `data/` folder and 
 observe the variable types. Are they as you left them?
 
-```{r label-me5}
-# add code here
+```{r check-favourite-food}
+favourite_food <- read.csv("data-raw/favourite-food.csv")
+favourite_food
+class(favourite_food$SES)
 ```
 
 # Part 2: Excel to RDS Workflow
@@ -63,9 +79,19 @@ observe the variable types. Are they as you left them?
 ## Step 1: Read the Data
 * Similar to Part 1, read  the Excel file called `favourite-food.xlsx` from the `data-raw/` folder, and handle missing data and variable types.
 
-```{r label-me6, eval=FALSE}
-fav_food <- read_excel(___, ___)
-fav_food 
+```{r read-in-data2}
+fav_food <- read_excel("data-raw/favourite-food.xlsx", 
+                       na = c("N/A", "99999"))
+fav_food <- fav_food %>%
+  mutate(
+    AGE = case_when(
+      AGE == "five" ~ "5", 
+      TRUE           ~ AGE
+    ), 
+    AGE = as.numeric(AGE)
+  )
+
+fav_food
 ```
 
 ## Step 2: Adjust Variable Types
@@ -73,22 +99,27 @@ fav_food
 * Convert SES (socioeconomic status) to a factor variables with levels in the 
 following order: `Low`, `Middle`, `High`.
 
-```{r label-me7}
-# add code here
+```{r factor2}
+fav_food %>%
+  mutate(SES = fct_relevel(SES, "Low", "Middle", "High"))
 ```
 
 ## Step 3: Save to RDS
 * Write out the resulting data frame to `favourite-food.rds` in the `data/` folder.
 
-```{r label-me8}
-# add code here
+```{r write-rds}
+write_rds(fav_food, file = "data-raw/favourite-food.rds")
+
+fs::dir_ls("data-raw")
 ```
 
 * Read `favourite-food.rds` back in from the `data/` folder and observe the 
 variable types. Are they as you left them?
 
-```{r label-me9}
-# add code here
+```{r label-read-rds}
+favourite_food <- read_rds("data-raw/favourite-food.rds")
+favourite_food
+class(favourite_food$SES)
 ```
 
 ## References {#references}
