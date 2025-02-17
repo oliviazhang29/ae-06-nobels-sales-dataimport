@@ -30,15 +30,13 @@ sales
 knitr::include_graphics("images/sales-2.png")
 ```
 
-```{r mutate}
+```{r mutate, eval=FALSE}
 sales %>%
   mutate(
-  brand = str_detect(id,"Brand"),
-  id = if_else(is.numeric(id),id,NULL)
+  brand = if_else(str_detect(id,"Brand"), id, NA)
   ) %>%
-  fill(brand) %>%
-  filter(is.numeric(id)) %>%
-  select(brand,id,n)
+ fill(brand) %>%
+  filter(n != "n")
 ```
 
 ## Hint 

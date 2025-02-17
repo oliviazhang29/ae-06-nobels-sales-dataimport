@@ -100,7 +100,7 @@ fav_food
 following order: `Low`, `Middle`, `High`.
 
 ```{r factor2}
-fav_food %>%
+fav_food <- fav_food %>%
   mutate(SES = fct_relevel(SES, "Low", "Middle", "High"))
 ```
 
